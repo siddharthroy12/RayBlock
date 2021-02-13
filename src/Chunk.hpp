@@ -9,6 +9,7 @@ class Chunk
 private:
     bool firstGen = true;
     Vector3 getBlockWorldCoord(int x, int y, int z);
+    Texture texture;
 public:
     int posX;
     int posZ;

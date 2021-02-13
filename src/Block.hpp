@@ -1,6 +1,13 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
+// +z = west
+// -z = east
+// +y = top
+// -y = bottom
+// x = north
+// -x = south
+
 enum class BLOCK_TYPE
 {
     SOLID,

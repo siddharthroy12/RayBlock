@@ -1,5 +1,6 @@
 #include "WorldState.hpp"
 #include <cmath>
+#include "iostream"
 
 void WorldState::loadAndRenderChunk(int x, int z)
 {
@@ -7,7 +8,7 @@ void WorldState::loadAndRenderChunk(int x, int z)
         return;
     }
 
-    std::string formatted_coord_string = x + "," + z;
+    std::string formatted_coord_string = std::to_string(x) + ',' + std::to_string(z);
     
     if ( !(this->chunks.count(formatted_coord_string) > 0) )
     {
@@ -21,14 +22,14 @@ void WorldState::loadAndRenderChunk(int x, int z)
 
 Block WorldState::getBlockAtPos(int x, int y, int z)
 {
-    if (x < 1 || y < 1 || z < 1) {
+    if (x < 1 || y < 1 || z < 1 || y > 256) {
         return (Block){ BLOCK_TYPE::_NULL };
     }
 
-    int chunkX = ceil(x / 16);
-    int chunkZ = ceil(z / 16);
+    int chunkX = ceil((double)x / (double)16);
+    int chunkZ = ceil((double)z / (double)16);
 
-    std::string formatted_coord_string = chunkX + "," + chunkZ;
+    std::string formatted_coord_string = std::to_string(chunkX) + ',' + std::to_string(chunkZ);
 
     if ( !(this->chunks.count(formatted_coord_string) > 0) )
     {
