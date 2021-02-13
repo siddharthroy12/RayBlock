@@ -56,6 +56,13 @@ int main(void)
 
         if (IsKeyDown('Z'))
             camera.target = (Vector3){0.0f, 0.0f, 0.0f};
+        if (IsKeyDown('R')) {
+            formatted_coord_string = std::to_string(1) + ',' + std::to_string(1);
+            if ( (worldState.chunks.count(formatted_coord_string) > 0) )
+            {
+                worldState.chunks[formatted_coord_string]->calculateMesh();
+            }
+        }
         //----------------------------------------------------------------------------------
 
         // Draw

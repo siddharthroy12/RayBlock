@@ -7,6 +7,7 @@
 #include <iostream>
 
 Chunk::Chunk(int x, int z) {
+    
     this->posX = x;
     this->posZ = z;
 
@@ -20,27 +21,38 @@ Chunk::Chunk(int x, int z) {
             }
         }
     }
+    vertices = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
+    normals = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
+    texcoords = (float *)RL_MALLOC(36 * 2 * 16 * 16 * 256 * sizeof(float));
+
+    mesh.vboId = (unsigned int *)RL_CALLOC(7, sizeof(unsigned int));
+    this->mesh.vertices = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
+    this->mesh.texcoords = (float *)RL_MALLOC(36 * 2 * 16 * 16 * 256 * sizeof(float));
+    this->mesh.normals = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
+    this->mesh.vertexCount = 0;
+    this->mesh.triangleCount = 0;
+    rlLoadMesh(&mesh, false);
+
     this->texture = LoadTexture(ASSETS_PATH "grass.png");
+    model.transform = MatrixIdentity();
+
+    model.meshCount = 1;
+    model.meshes = (Mesh *)RL_CALLOC(model.meshCount, sizeof(Mesh));
+    model.meshes[0] = mesh;
+    model.materialCount = 1;
+    model.materials = (Material *)RL_CALLOC(model.materialCount, sizeof(Material));
+    model.materials[0] = LoadMaterialDefault();
+
+    model.meshMaterial = (int *)RL_CALLOC(model.meshCount, sizeof(int));
+    model.meshMaterial[0] = 0;  // First material index
+
+    this->model.materials[0].maps[MAP_DIFFUSE].texture = this->texture;
     this->calculateMesh();
 
 }
 
 void Chunk::calculateMesh()
 {
-    if (!(this->firstGen))
-    {
-        UnloadModel(this->model);
-    } else {
-        this->firstGen = false;
-    }
-
-    Mesh mesh = {0};
-    mesh.vboId = (unsigned int *)RL_CALLOC(7, sizeof(unsigned int));
-
-    float *vertices = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
-    float *normals = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
-    float *texcoords = (float *)RL_MALLOC(36 * 2 * 16 * 16 * 256 * sizeof(float));
-
     int verticesCount = 0;
     int texcoordsCount = 0;
     int normalsCount = 0;
@@ -211,26 +223,28 @@ void Chunk::calculateMesh()
         }
     }
 
-    mesh.vertices = (float *)RL_MALLOC(verticesCount * sizeof(float));
-    memcpy(mesh.vertices, vertices, verticesCount * sizeof(float));
+    // RL_FREE(model.meshes[0].vertices);
+    // RL_FREE(model.meshes[0].texcoords);
+    // RL_FREE(model.meshes[0].normals);
 
-    mesh.texcoords = (float *)RL_MALLOC(texcoordsCount * sizeof(float));
-    memcpy(mesh.texcoords, texcoords, texcoordsCount * sizeof(float));
+    //model.meshes[0].vertices = (float *)RL_MALLOC(verticesCount * sizeof(float));
+    memcpy(model.meshes[0].vertices, vertices, verticesCount * sizeof(float));
 
-    mesh.normals = (float *)RL_MALLOC(normalsCount * sizeof(float));
-    memcpy(mesh.normals, normals, normalsCount * sizeof(float));
+    //model.meshes[0].texcoords = (float *)RL_MALLOC(texcoordsCount * sizeof(float));
+    memcpy(model.meshes[0].texcoords, texcoords, texcoordsCount * sizeof(float));
 
-    mesh.vertexCount = verticesCount / 3;         // fixme: Why divide by 3 ???
-    mesh.triangleCount = (verticesCount / 3) / 2; // fixme: Why divide by 3 and 2 ???
+    //model.meshes[0].normals = (float *)RL_MALLOC(normalsCount * sizeof(float));
+    memcpy(model.meshes[0].normals, normals, normalsCount * sizeof(float));
 
-    RL_FREE(vertices);
-    RL_FREE(texcoords);
-    RL_FREE(normals);
 
-    rlLoadMesh(&mesh, false);
-    this->model = LoadModelFromMesh(mesh);
 
-    this->model.materials[0].maps[MAP_DIFFUSE].texture = this->texture;
+    this->model.meshes[0].vertexCount = verticesCount / 3;         // fixme: Why divide by 3 ???
+    this->model.meshes[0].triangleCount = (verticesCount / 3) / 2; // fixme: Why divide by 3 and 2 ???
+
+    rlUpdateMesh(this->model.meshes[0], 0, verticesCount);
+    rlUpdateMesh(this->model.meshes[0], 1, verticesCount);
+    rlUpdateMesh(this->model.meshes[0], 2, verticesCount);
+    //this->model.meshes[0] = mesh;
 }
 
 Vector3 Chunk::getBlockWorldCoord(int x, int y, int z)
@@ -245,6 +259,11 @@ Vector3 Chunk::getBlockWorldCoord(int x, int y, int z)
 }
 
 Chunk::~Chunk() {
+
+    RL_FREE(vertices);
+    RL_FREE(texcoords);
+    RL_FREE(normals);
+
     UnloadTexture(this->texture);
     if (!this->firstGen)
     {
