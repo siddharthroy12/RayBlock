@@ -6,14 +6,15 @@
 #include "WorldContext.hpp"
 #include <iostream>
 
-Chunk::Chunk(int x, int z) {
+Chunk::Chunk(int x, int y, int z) {
     
     this->posX = x;
+    this->posY = y;
     this->posZ = z;
 
     for (int x = 0; x < 16; x++)
     {
-        for (int y = 0; y < 256; y++)
+        for (int y = 0; y < 16; y++)
         {
             for (int z = 0; z < 16; z++)
             {
@@ -21,14 +22,15 @@ Chunk::Chunk(int x, int z) {
             }
         }
     }
-    vertices = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
-    normals = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
-    texcoords = (float *)RL_MALLOC(36 * 2 * 16 * 16 * 256 * sizeof(float));
+
+    vertices = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 16 * sizeof(float));
+    normals = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 16 * sizeof(float));
+    texcoords = (float *)RL_MALLOC(36 * 2 * 16 * 16 * 16 * sizeof(float));
 
     mesh.vboId = (unsigned int *)RL_CALLOC(7, sizeof(unsigned int));
-    this->mesh.vertices = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
-    this->mesh.texcoords = (float *)RL_MALLOC(36 * 2 * 16 * 16 * 256 * sizeof(float));
-    this->mesh.normals = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 256 * sizeof(float));
+    this->mesh.vertices = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 16 * sizeof(float));
+    this->mesh.texcoords = (float *)RL_MALLOC(36 * 2 * 16 * 16 * 16 * sizeof(float));
+    this->mesh.normals = (float *)RL_MALLOC(36 * 3 * 16 * 16 * 16 * sizeof(float));
     this->mesh.vertexCount = 0;
     this->mesh.triangleCount = 0;
     rlLoadMesh(&mesh, false);
@@ -59,19 +61,22 @@ void Chunk::calculateMesh()
 
     for (int x = 0; x < 16; x++)
     {
-        for (int y = 0; y < 256; y++)
+        for (int y = 0; y < 16; y++)
         {
             for (int z = 0; z < 16; z++)
             {
                 if (this->blocks[x][y][z].TYPE == BLOCK_TYPE::SOLID) {
                     SOLID_BLOCK_VERTICES blockVertices = GenCubeVertices(x, y, z);
+                    //std::cout << "CunkX" << posX << std::endl;
                     Vector3 blockWorldCoord = getBlockWorldCoord(x, y, z);
+                    //std::cout << "BlockX" << x << std::endl;
+                    //std::cout << "BlockWorldX" << blockWorldCoord.x << std::endl;
                     Vector3 tmp;
                     Block blockToCheck;
                     // West
                     tmp = blockWorldCoord;
                     tmp.z += 1;
-                    blockToCheck = worldState.getBlockAtPos(tmp.x, tmp.y, tmp.z);
+                    blockToCheck = worldState->getBlockAtPos(tmp.x, tmp.y, tmp.z);
                     if (!(blockToCheck.TYPE == BLOCK_TYPE::SOLID))
                     {
                         // Vertices
@@ -96,7 +101,7 @@ void Chunk::calculateMesh()
                     // East
                     tmp = blockWorldCoord;
                     tmp.z -= 1;
-                    blockToCheck = worldState.getBlockAtPos(tmp.x, tmp.y, tmp.z);
+                    blockToCheck = worldState->getBlockAtPos(tmp.x, tmp.y, tmp.z);
                     if (!(blockToCheck.TYPE == BLOCK_TYPE::SOLID))
                     {
                         // Vertices
@@ -121,7 +126,7 @@ void Chunk::calculateMesh()
                     // Top
                     tmp = blockWorldCoord;
                     tmp.y += 1;
-                    blockToCheck = worldState.getBlockAtPos(tmp.x, tmp.y, tmp.z);
+                    blockToCheck = worldState->getBlockAtPos(tmp.x, tmp.y, tmp.z);
                     if (!(blockToCheck.TYPE == BLOCK_TYPE::SOLID))
                     {
                         // Vertices
@@ -146,7 +151,7 @@ void Chunk::calculateMesh()
                     // Bottom
                     tmp = blockWorldCoord;
                     tmp.y -= 1;
-                    blockToCheck = worldState.getBlockAtPos(tmp.x, tmp.y, tmp.z);
+                    blockToCheck = worldState->getBlockAtPos(tmp.x, tmp.y, tmp.z);
                     if (!(blockToCheck.TYPE == BLOCK_TYPE::SOLID))
                     {
                         // Vertices
@@ -171,7 +176,7 @@ void Chunk::calculateMesh()
                     // North
                     tmp = blockWorldCoord;
                     tmp.x += 1;
-                    blockToCheck = worldState.getBlockAtPos(tmp.x, tmp.y, tmp.z);
+                    blockToCheck = worldState->getBlockAtPos(tmp.x, tmp.y, tmp.z);
                     if (!(blockToCheck.TYPE == BLOCK_TYPE::SOLID))
                     {
                         // Vertices
@@ -196,7 +201,7 @@ void Chunk::calculateMesh()
                     // South
                     tmp = blockWorldCoord;
                     tmp.x -= 1;
-                    blockToCheck = worldState.getBlockAtPos(tmp.x, tmp.y, tmp.z);
+                    blockToCheck = worldState->getBlockAtPos(tmp.x, tmp.y, tmp.z);
                     if (!(blockToCheck.TYPE == BLOCK_TYPE::SOLID))
                     {
                         // Vertices
@@ -250,9 +255,9 @@ void Chunk::calculateMesh()
 Vector3 Chunk::getBlockWorldCoord(int x, int y, int z)
 {
     Vector3 blockWorldCoord = {
-        ((this->posX - 1) * 16) + x + 1,
-        y + 1,
-        ((this->posZ - 1) * 16) + z + 1
+        x + (this->posX * 16),
+        y + (this->posY * 16),
+        z + (this->posZ * 16)
     };
 
     return blockWorldCoord;

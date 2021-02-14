@@ -3,6 +3,6 @@
 
 #include "WorldState.hpp"
 
-extern WorldState worldState;
+extern WorldState* worldState;
 
 #endif

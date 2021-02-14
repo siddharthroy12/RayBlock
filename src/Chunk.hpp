@@ -16,11 +16,12 @@ private:
     float *texcoords;
 public:
     int posX;
+    int posY;
     int posZ;
-    Block blocks[16][256][16];
+    Block blocks[16][16][16];
     Model model = {0};
     void calculateMesh();
-    Chunk(int x, int z);
+    Chunk(int x, int y, int z);
     ~Chunk();
 };
 

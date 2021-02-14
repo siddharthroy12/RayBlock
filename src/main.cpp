@@ -11,6 +11,8 @@
 
 int main(void)
 {
+    worldState = new WorldState();
+    
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
@@ -25,23 +27,16 @@ int main(void)
     camera.up = (Vector3){0.0f, 1.0f, 0.0f};          // Camera up vector (rotation towards target)
     camera.fovy = 45.0f;                              // Camera field-of-view Y
     camera.type = CAMERA_PERSPECTIVE;                 // Camera mode type
-    worldState.loadAndRenderChunk(1,1);
-    std::string formatted_coord_string = std::to_string(1) + ',' + std::to_string(1);
-    if ( (worldState.chunks.count(formatted_coord_string) > 0) )
-    {
-        worldState.chunks[formatted_coord_string]->calculateMesh();
-    }
-    worldState.loadAndRenderChunk(1,2);
-    formatted_coord_string = std::to_string(1) + ',' + std::to_string(2);
-    if ( (worldState.chunks.count(formatted_coord_string) > 0) )
-    {
-        worldState.chunks[formatted_coord_string]->calculateMesh();
-    }
-    formatted_coord_string = std::to_string(1) + ',' + std::to_string(1);
-    if ( (worldState.chunks.count(formatted_coord_string) > 0) )
-    {
-        worldState.chunks[formatted_coord_string]->calculateMesh();
-    }
+    
+    worldState->loadAndRenderChunk(0,0,0);
+    std::cout << ((worldState->_chunks[0][0][0]->blocks[15][15][15].TYPE) == BLOCK_TYPE::SOLID) << std::endl;
+    worldState->_chunks[0][0][0]->calculateMesh();
+    worldState->loadAndRenderChunk(1,0,0);
+    
+    worldState->_chunks[1][0][0]->calculateMesh();
+    std::cout << "pass" << std::endl;
+    worldState->_chunks[0][0][0]->calculateMesh();
+    
     SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode
 
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
@@ -57,11 +52,7 @@ int main(void)
         if (IsKeyDown('Z'))
             camera.target = (Vector3){0.0f, 0.0f, 0.0f};
         if (IsKeyDown('R')) {
-            formatted_coord_string = std::to_string(1) + ',' + std::to_string(1);
-            if ( (worldState.chunks.count(formatted_coord_string) > 0) )
-            {
-                worldState.chunks[formatted_coord_string]->calculateMesh();
-            }
+            worldState->_chunks[1][0][0]->calculateMesh();
         }
         //----------------------------------------------------------------------------------
 
@@ -73,8 +64,8 @@ int main(void)
 
         BeginMode3D(camera);
 
-        worldState.loadAndRenderChunk(1,1);
-        worldState.loadAndRenderChunk(1,2);
+        worldState->loadAndRenderChunk(0,0,0);
+        worldState->loadAndRenderChunk(1,0,0);
 
         DrawGrid(10, 1.0f);
 

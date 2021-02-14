@@ -8,9 +8,13 @@
 
 class WorldState {
     public:
+    WorldState();
     std::map<std::string, Chunk*> chunks;
-    void loadAndRenderChunk(int x, int z);
+    Chunk* _chunks[100][16][100];
+    void loadAndRenderChunk(int x, int y, int z);
     Block getBlockAtPos(int x, int y, int z);
+    ~WorldState();
+    
 };
 
 

@@ -1,3 +1,3 @@
 #include "WorldState.hpp"
 
-WorldState worldState;
+WorldState* worldState = nullptr;
